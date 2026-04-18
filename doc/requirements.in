@@ -10,6 +10,7 @@ sphinx-notfound-page
 sphinx-copybutton
 sphinx-togglebutton
 sphinx-sitemap
+sphinx-llm
 sphinx-autobuild
 sphinxcontrib.programoutput
 
