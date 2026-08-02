@@ -38,6 +38,131 @@ config NATIVE_HOST_WINDOWS
 	help
 	  The build host is Windows.
 
+# Host capabilities.
+#
+# What a passthrough driver actually needs is a service -- a PTY, a TAP
+# device, a CAN socket -- not an operating system. Depending on the service
+# keeps the requirement true when a second host grows the same capability,
+# and it makes "why is this driver unavailable" answerable without knowing
+# which host implies what.
+#
+# These are prompted, unlike the identity symbols above, because a capability
+# is not purely a function of the OS: a Linux machine built without TUN/TAP
+# support genuinely lacks NATIVE_HOST_HAS_TAP. The defaults describe the
+# common case; the prompt exists so a build can tell the truth about an
+# unusual machine, and so the absent-capability path stays testable.
+#
+# Non-Linux defaults are deliberately conservative. A capability is claimed
+# for macOS or Windows only where this project has actually verified it;
+# everything else stays n until the phase that ports it says otherwise.
+# Absent is the safe error -- it disables a driver, where a wrong y produces
+# a link failure or, worse, silently wrong behaviour.
+
+config NATIVE_HOST_HAS_PTY
+	bool "Host provides POSIX pseudo-terminals"
+	default y if NATIVE_HOST_LINUX || NATIVE_HOST_MACOS
+	help
+	  posix_openpt(), grantpt(), unlockpt() and ptsname() are available.
+	  Windows has no POSIX PTY; a named-pipe backend with a different
+	  developer workflow is the intended replacement there.
+
+config NATIVE_HOST_HAS_TERMIOS
+	bool "Host provides termios terminal control"
+	default y if NATIVE_HOST_LINUX || NATIVE_HOST_MACOS
+	help
+	  <termios.h> and the tc*attr() family are available.
+
+config NATIVE_HOST_HAS_TAP
+	bool "Host provides TAP network devices"
+	default y if NATIVE_HOST_LINUX
+	help
+	  A /dev/net/tun style layer 2 TAP device is available. macOS has no
+	  TAP device: utun is layer 3 point-to-point, and the third-party
+	  tuntaposx is unmaintained on Apple silicon. Windows would need
+	  Wintun plus administrator privileges.
+
+config NATIVE_HOST_HAS_BT_HCI_SOCKET
+	bool "Host provides raw Bluetooth HCI sockets"
+	default y if NATIVE_HOST_LINUX
+	help
+	  AF_BLUETOOTH raw HCI sockets, as used to attach to a real
+	  controller. Named for the kernel facility rather than for BlueZ,
+	  because only one of the userchan driver's backends needs it -- its
+	  TCP and AF_UNIX backends are already portable, and gating the whole
+	  driver on "is BlueZ present" would discard working code.
+
+config NATIVE_HOST_HAS_USBIP
+	bool "Host provides a USB/IP virtual host controller"
+	default y if NATIVE_HOST_LINUX
+	help
+	  The vhci_hcd USB/IP stack is available.
+
+	  Note this capability is currently descriptive only. The USB/IP
+	  driver has no embedded/runner split -- it runs raw sockets in
+	  embedded context -- so it cannot yet be gated on this symbol. It
+	  must be split first.
+
+config NATIVE_HOST_HAS_SOCKETCAN
+	bool "Host provides SocketCAN"
+	default y if NATIVE_HOST_LINUX
+	help
+	  AF_CAN sockets and the SocketCAN stack are available.
+
+config NATIVE_HOST_HAS_FUSE
+	bool "Host provides FUSE"
+	default y if NATIVE_HOST_LINUX
+	help
+	  Filesystem in Userspace is available for exposing a simulated
+	  filesystem to the host. macOS requires third-party macFUSE, so this
+	  is not assumed there.
+
+config NATIVE_HOST_HAS_MMAP
+	bool "Host provides POSIX mmap()"
+	default y if NATIVE_HOST_LINUX || NATIVE_HOST_MACOS
+	help
+	  mmap() is available for file-backed storage. Windows would use
+	  CreateFileMapping() instead.
+
+config NATIVE_HOST_HAS_SYSFS
+	bool "Host provides a Linux sysfs tree"
+	default y if NATIVE_HOST_LINUX
+	help
+	  /sys is available, as used by drivers that drive real host LEDs or
+	  read host thermal sensors.
+
+config NATIVE_HOST_HAS_EVDEV
+	bool "Host provides Linux evdev input devices"
+	default y if NATIVE_HOST_LINUX
+	help
+	  /dev/input/event* character devices are available.
+
+config NATIVE_HOST_HAS_EPOLL
+	bool "Host provides epoll"
+	default y if NATIVE_HOST_LINUX
+	help
+	  epoll_create1()/epoll_wait() are available. BSD-derived hosts
+	  provide kqueue instead, and Windows neither.
+
+config NATIVE_HOST_HAS_GETRANDOM
+	bool "Host provides getrandom()"
+	default y if NATIVE_HOST_LINUX
+	help
+	  The getrandom() system call is available. macOS provides
+	  getentropy() instead.
+
+config NATIVE_HOST_HAS_THREAD_STACK_BOUNDS
+	bool "Host can report a thread's real stack bounds"
+	default y if NATIVE_HOST_LINUX || NATIVE_HOST_MACOS
+	help
+	  The host pthreads implementation can report the stack address and
+	  size of an arbitrary thread: pthread_getattr_np() plus
+	  pthread_attr_getstack() on glibc, or pthread_get_stackaddr_np() and
+	  pthread_get_stacksize_np() on Darwin.
+
+	  Verified absent on Windows: winpthreads offers no equivalent
+	  accessor. Only CONFIG_ARCH_POSIX_UPDATE_STACK_INFO needs this, and
+	  that symbol is opt-in, so a default build is unaffected.
+
 config ARCH_POSIX_UPDATE_STACK_INFO
 	bool "Update thread stack info with real pthread stack bounds"
 	depends on THREAD_STACK_INFO
