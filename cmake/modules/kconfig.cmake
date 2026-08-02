@@ -175,6 +175,11 @@ set(COMMON_KCONFIG_ENV_SETTINGS
   TOOLCHAIN_HAS_GLIBCXX=${_local_TOOLCHAIN_HAS_GLIBCXX}
   TOOLCHAIN_HAS_LIBCXX=${_local_TOOLCHAIN_HAS_LIBCXX}
   EDT_PICKLE=${EDT_PICKLE}
+  # Name of the OS running the build itself, not the target. Boards which
+  # execute on the build host (see arch/posix) use this to distinguish
+  # "is a POSIX architecture build" from "is running on Linux", which are
+  # currently conflated.
+  HOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME}
   # Export all Zephyr modules to Kconfig
   ${ZEPHYR_KCONFIG_MODULES_DIR}
 )

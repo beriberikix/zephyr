@@ -9,6 +9,35 @@ menu "Native (POSIX) Architecture Options"
 config ARCH
 	default "posix"
 
+# Identity of the host OS this build is running on.
+#
+# These are detected, never selected: CMake determines them from
+# CMAKE_HOST_SYSTEM_NAME and passes it in as $(HOST_SYSTEM_NAME). Setting them
+# by hand describes a machine you are not on, so they carry no prompt.
+#
+# Drivers should depend on the NATIVE_HOST_HAS_* capability symbols below
+# rather than on these. A driver needs a PTY, not "Linux" -- and stating that
+# directly keeps the dependency honest when a second host grows the same
+# capability.
+
+config NATIVE_HOST_LINUX
+	bool
+	default y if "$(HOST_SYSTEM_NAME)" = "Linux"
+	help
+	  The build host is Linux.
+
+config NATIVE_HOST_MACOS
+	bool
+	default y if "$(HOST_SYSTEM_NAME)" = "Darwin"
+	help
+	  The build host is macOS. CMAKE_HOST_SYSTEM_NAME reports Darwin.
+
+config NATIVE_HOST_WINDOWS
+	bool
+	default y if "$(HOST_SYSTEM_NAME)" = "Windows"
+	help
+	  The build host is Windows.
+
 config ARCH_POSIX_UPDATE_STACK_INFO
 	bool "Update thread stack info with real pthread stack bounds"
 	depends on THREAD_STACK_INFO
