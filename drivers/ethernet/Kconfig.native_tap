@@ -5,7 +5,7 @@
 
 menuconfig ETH_NATIVE_TAP
 	bool "Native TAP Ethernet driver"
-	depends on ARCH_POSIX
+	depends on NATIVE_HOST_HAS_TAP
 	help
 	  Enable native_sim TAP ethernet driver. Note, this driver is run inside
 	  a process in your host system.

@@ -7,7 +7,7 @@ config CAN_NATIVE_LINUX
 	bool "Native Linux SocketCAN Driver"
 	default y
 	depends on DT_HAS_ZEPHYR_NATIVE_LINUX_CAN_ENABLED
-	depends on ARCH_POSIX
+	depends on NATIVE_HOST_HAS_SOCKETCAN
 	help
 	  Enable native Linux SocketCAN Driver
 

@@ -59,10 +59,12 @@ if(CONFIG_INPUT_SDL_TOUCH)
 endif()
 
 if(CONFIG_NATIVE_LINUX_EVDEV)
-  if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
-    zephyr_library_sources(linux_evdev.c)
-    target_sources(native_simulator INTERFACE linux_evdev_bottom.c)
-  else()
-    message(FATAL_ERROR "CONFIG_NATIVE_LINUX_EVDEV only available on Linux")
+  if(NOT CONFIG_NATIVE_HOST_HAS_EVDEV)
+    message(FATAL_ERROR
+      "CONFIG_NATIVE_LINUX_EVDEV needs Linux evdev input devices, which this "
+      "build host (${CMAKE_HOST_SYSTEM_NAME}) does not provide "
+      "(CONFIG_NATIVE_HOST_HAS_EVDEV=n).")
   endif()
+  zephyr_library_sources(linux_evdev.c)
+  target_sources(native_simulator INTERFACE linux_evdev_bottom.c)
 endif()

@@ -35,10 +35,12 @@ zephyr_library_sources_ifdef(CONFIG_TLC59108 tlc59108.c)
 # zephyr-keep-sorted-stop
 
 if(CONFIG_NATIVE_LINUX_LEDS)
-  if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
-    zephyr_library_sources(linux_leds.c)
-    target_sources(native_simulator INTERFACE linux_leds_bottom.c)
-  else()
-    message(FATAL_ERROR "CONFIG_NATIVE_LINUX_LEDS is only available on Linux")
+  if(NOT CONFIG_NATIVE_HOST_HAS_SYSFS)
+    message(FATAL_ERROR
+      "CONFIG_NATIVE_LINUX_LEDS needs a sysfs tree, which this build host "
+      "(${CMAKE_HOST_SYSTEM_NAME}) does not provide "
+      "(CONFIG_NATIVE_HOST_HAS_SYSFS=n).")
   endif()
+  zephyr_library_sources(linux_leds.c)
+  target_sources(native_simulator INTERFACE linux_leds_bottom.c)
 endif()

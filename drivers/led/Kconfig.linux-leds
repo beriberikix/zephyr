@@ -5,7 +5,7 @@ config NATIVE_LINUX_LEDS
 	bool "Native Linux LEDs based LED device"
 	default y
 	depends on DT_HAS_ZEPHYR_NATIVE_LINUX_LEDS_ENABLED
-	depends on ARCH_POSIX
+	depends on NATIVE_HOST_HAS_SYSFS
 	select NATIVE_USE_NSI_ERRNO
 	help
 	  Enable a native_sim LED driver backed by Linux sysfs LEDs.

@@ -51,14 +51,16 @@ zephyr_library_sources_ifdef(CONFIG_CAN_XMC4XXX can_xmc4xxx.c)
 # zephyr-keep-sorted-stop
 
 if(CONFIG_CAN_NATIVE_LINUX)
-  if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
-    zephyr_library_include_directories(${ZEPHYR_BASE}/subsys/net/l2)
-    zephyr_library_sources(can_native_linux.c)
-
-    target_sources(native_simulator INTERFACE can_native_linux_adapt.c)
-  else()
-    message(FATAL_ERROR "CONFIG_CAN_NATIVE_LINUX is only available on Linux")
+  if(NOT CONFIG_NATIVE_HOST_HAS_SOCKETCAN)
+    message(FATAL_ERROR
+      "CONFIG_CAN_NATIVE_LINUX needs SocketCAN, which this build host "
+      "(${CMAKE_HOST_SYSTEM_NAME}) does not provide "
+      "(CONFIG_NATIVE_HOST_HAS_SOCKETCAN=n).")
   endif()
+  zephyr_library_include_directories(${ZEPHYR_BASE}/subsys/net/l2)
+  zephyr_library_sources(can_native_linux.c)
+
+  target_sources(native_simulator INTERFACE can_native_linux_adapt.c)
 endif()
 
 add_subdirectory(transceiver)
