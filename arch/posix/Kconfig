@@ -143,6 +143,20 @@ config NATIVE_HOST_HAS_EPOLL
 	  epoll_create1()/epoll_wait() are available. BSD-derived hosts
 	  provide kqueue instead, and Windows neither.
 
+config NATIVE_HOST_HAS_GETHOSTID
+	bool "Host provides a meaningful gethostid()"
+	default y if NATIVE_HOST_LINUX
+	help
+	  gethostid() is available and returns an identifier actually derived
+	  from the machine, so it can back a simulated hardware device ID.
+
+	  Note this asks for more than the symbol existing. macOS declares and
+	  links gethostid() but returns a constant 0 unless sethostid() has
+	  been called, which would give every simulated device the same ID --
+	  silently wrong data rather than an honest absence. It therefore
+	  stays n there pending a decision on whether a constant is acceptable
+	  for this purpose. Windows has no equivalent.
+
 config NATIVE_HOST_HAS_GETRANDOM
 	bool "Host provides getrandom()"
 	default y if NATIVE_HOST_LINUX

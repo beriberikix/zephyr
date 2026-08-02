@@ -4,7 +4,7 @@
 config HWINFO_NATIVE
 	bool "HWINFO driver for native_sim"
 	default y
-	depends on ARCH_POSIX
+	depends on NATIVE_HOST_HAS_GETHOSTID
 	select HWINFO_HAS_DRIVER
 	help
 	  Enable native_sim HWINFO driver.

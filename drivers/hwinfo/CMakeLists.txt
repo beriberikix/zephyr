@@ -9,13 +9,15 @@ zephyr_library_sources_ifdef(CONFIG_HWINFO hwinfo_weak_impl.c)
 zephyr_library_sources_ifdef(CONFIG_HWINFO_SHELL hwinfo_shell.c)
 
 if(CONFIG_HWINFO_NATIVE)
-  if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
-    zephyr_library_sources(hwinfo_native.c)
-
-    target_sources(native_simulator INTERFACE hwinfo_native_bottom.c)
-  else()
-    message(FATAL_ERROR "CONFIG_HWINFO_NATIVE is only available on Linux")
+  if(NOT CONFIG_NATIVE_HOST_HAS_GETHOSTID)
+    message(FATAL_ERROR
+      "CONFIG_HWINFO_NATIVE derives a device ID from gethostid(), which this "
+      "build host (${CMAKE_HOST_SYSTEM_NAME}) does not provide usefully "
+      "(CONFIG_NATIVE_HOST_HAS_GETHOSTID=n).")
   endif()
+  zephyr_library_sources(hwinfo_native.c)
+
+  target_sources(native_simulator INTERFACE hwinfo_native_bottom.c)
 endif()
 
 # zephyr-keep-sorted-start
