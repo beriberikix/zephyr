@@ -138,6 +138,17 @@ config RESET_ON_FATAL_ERROR
 	help
 		Initiate a system reset when a fatal error would normally halt the system.
 
+config SEMIHOST_EXIT_ON_FATAL_ERROR
+	bool "Report fatal errors to an attached debugger through semihosting"
+	depends on SEMIHOST
+	help
+	  After a fatal error has been logged, report it to the host through a
+	  semihosting SYS_EXIT_EXTENDED call with reason
+	  ADP_Stopped_RunTimeErrorUnknown and the fatal error reason as the
+	  status, so that a debugger running the application can exit with an
+	  error. If no debugger is attached, the system is halted or reset as
+	  usual.
+
 config HAS_POWEROFF
 	bool
 	help
