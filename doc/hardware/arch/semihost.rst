@@ -54,6 +54,32 @@ directory of the running process.
    /* Close the file */
    semihost_close(fd);
 
+Reporting Exit Status
+*********************
+
+An application can report its exit status to the host with
+:c:func:`semihost_exit`. The host debugger or emulator normally stops execution
+and uses the status as its own exit code, which makes it possible to run test
+images on hardware and obtain a pass or fail result.
+
+.. code-block:: c
+
+   /* Report success to the host */
+   semihost_exit(SEMIHOST_EXIT_APPLICATION_EXIT, 0);
+
+   /* Only reached if no debugger is attached */
+
+Executing a semihosting instruction without a debugger attached can fault.
+:c:func:`semihost_exit` therefore only issues the call if
+:c:func:`semihost_debugger_attached` reports that a debugger is attached, and
+returns ``-ENODEV`` otherwise.
+
+Architectures that cannot detect a debugger only perform :c:func:`semihost_exit`
+on emulated targets, unless :kconfig:option:`CONFIG_SEMIHOST_ASSUME_DEBUGGER` is
+enabled. Enabling it on a target that runs without a debugger makes the
+instruction fault: on RISC-V the resulting exception ends in a fatal error, and
+if fatal errors are reported the same way, in a reboot loop.
+
 Additional Functionality
 ************************
 

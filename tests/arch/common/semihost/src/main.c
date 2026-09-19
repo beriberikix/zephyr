@@ -68,4 +68,10 @@ ZTEST(semihost, test_file_ops)
 	zassert_equal(semihost_close(fd), 0, "Close failed");
 }
 
+ZTEST(semihost, test_debugger_attached)
+{
+	/* Semihosting is always serviced by the emulator */
+	zassert_true(semihost_debugger_attached(), "Debugger not detected");
+}
+
 ZTEST_SUITE(semihost, NULL, NULL, NULL, NULL, NULL);

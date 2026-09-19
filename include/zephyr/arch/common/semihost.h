@@ -23,6 +23,8 @@
 #ifndef ZEPHYR_INCLUDE_ARCH_COMMON_SEMIHOST_H_
 #define ZEPHYR_INCLUDE_ARCH_COMMON_SEMIHOST_H_
 
+#include <stdbool.h>
+
 /** @brief Semihosting instructions */
 enum semihost_instr {
 	/*
@@ -79,7 +81,9 @@ enum semihost_instr {
 	SEMIHOST_GET_CMDLINE    = 0x15,
 	SEMIHOST_HEAPINFO       = 0x16,
 	SEMIHOST_ISERROR        = 0x08,
-	SEMIHOST_SYSTEM         = 0x12
+	SEMIHOST_SYSTEM         = 0x12,
+	/** Report an exit reason and status to the host and stop execution. */
+	SEMIHOST_EXIT_EXTENDED  = 0x20
 };
 
 /**
@@ -101,6 +105,19 @@ enum semihost_open_mode {
 	SEMIHOST_OPEN_AB        = 9,
 	SEMIHOST_OPEN_A_PLUS    = 10,
 	SEMIHOST_OPEN_AB_PLUS   = 11,
+};
+
+/**
+ * @brief Semihosting exit reasons
+ *
+ * Subset of the ADP_Stopped_* reason codes from the semihosting specification,
+ * for use with @ref semihost_exit.
+ */
+enum semihost_exit_reason {
+	/** An unknown runtime error occurred. */
+	SEMIHOST_EXIT_RUNTIME_ERROR_UNKNOWN = 0x20023,
+	/** The application exited, the status is the exit code. */
+	SEMIHOST_EXIT_APPLICATION_EXIT      = 0x20026,
 };
 
 /**
@@ -193,6 +210,38 @@ long semihost_read(long fd, void *buf, long len);
  * @retval -errno negative error code on failure.
  */
 long semihost_write(long fd, const void *buf, long len);
+
+/**
+ * @brief Check whether a debugger that can service semihosting is attached
+ *
+ * Executing a semihosting instruction without a debugger attached faults on
+ * some architectures. Architectures that can detect an attached debugger
+ * override this function. The default implementation only reports one on
+ * emulated targets, so @kconfig{CONFIG_SEMIHOST_ASSUME_DEBUGGER} is needed to
+ * use @ref semihost_exit on the others.
+ *
+ * @retval true a debugger is (or may be) attached.
+ * @retval false no debugger is attached.
+ */
+bool semihost_debugger_attached(void);
+
+/**
+ * @brief Report an exit reason and status to the host
+ *
+ * Uses SYS_EXIT_EXTENDED, which allows passing an exit status on all
+ * architectures. The host debugger normally stops execution and does not
+ * return. The call is skipped if @ref semihost_debugger_attached reports that
+ * no debugger is attached, unless @kconfig{CONFIG_SEMIHOST_ASSUME_DEBUGGER} is
+ * enabled.
+ *
+ * @param reason value from @ref semihost_exit_reason.
+ * @param status exit status, 0 for success with
+ *               @ref SEMIHOST_EXIT_APPLICATION_EXIT.
+ *
+ * @retval -ENODEV no debugger is attached.
+ * @retval -EIO the host did not stop execution.
+ */
+int semihost_exit(enum semihost_exit_reason reason, long status);
 
 /**
  * @}
