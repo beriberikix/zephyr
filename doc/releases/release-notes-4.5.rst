@@ -647,6 +647,11 @@ New APIs and options
   * :kconfig:option:`CONFIG_SEMIHOST_EXIT_ON_FATAL_ERROR` (report fatal errors to an
     attached debugger through semihosting)
 
+* Logging
+
+  * :kconfig:option:`CONFIG_LOG_DICTIONARY_DB_EMBED` (embed the dictionary logging database
+    into the ELF file)
+
 * LoRa
 
   * :c:func:`lora_recv_duty_cycle`
