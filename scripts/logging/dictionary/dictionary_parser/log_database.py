@@ -10,6 +10,7 @@ Class for Dictionary-based Logging Database
 
 import base64
 import copy
+import gzip
 import json
 
 from .mipi_syst import gen_syst_xml_file
@@ -265,8 +266,8 @@ class LogDatabase:
         return database
 
     @staticmethod
-    def write_json_database(db_file_name, database):
-        """Write the database into file"""
+    def write_json_database(db_file_name, database, compress=False):
+        """Write the database into file, optionally compressed with gzip"""
         json_db = copy.deepcopy(database.database)
 
         # Make database object into something JSON can dump
@@ -277,8 +278,14 @@ class LogDatabase:
                 del sect['data']
 
         try:
-            with open(db_file_name, "w", encoding="iso-8859-1") as db_fd:
-                db_fd.write(json.dumps(json_db))
+            if compress:
+                # Fixed mtime so that the output is reproducible
+                data = gzip.compress(json.dumps(json_db).encode("iso-8859-1"), mtime=0)
+                with open(db_file_name, "wb") as db_fd:
+                    db_fd.write(data)
+            else:
+                with open(db_file_name, "w", encoding="iso-8859-1") as db_fd:
+                    db_fd.write(json.dumps(json_db))
         except OSError:
             return False
 

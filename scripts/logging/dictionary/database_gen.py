@@ -78,6 +78,11 @@ def parse_args():
     outfile_grp.add_argument("--json", help="Output Dictionary Logging Database file in JSON")
     outfile_grp.add_argument("--syst", help="Output MIPI Sys-T Collateral XML file")
 
+    argparser.add_argument(
+        "--json-gz",
+        help="Also output the JSON database compressed with gzip, e.g. for embedding",
+    )
+
     return argparser.parse_args()
 
 
@@ -252,6 +257,16 @@ def process_kconfigs(elf, database):
     # Use 32-bit timestamp? or 64-bit?
     if "CONFIG_LOG_TIMESTAMP_64BIT" in kconfigs:
         database.add_kconfig("CONFIG_LOG_TIMESTAMP_64BIT", kconfigs['CONFIG_LOG_TIMESTAMP_64BIT'])
+
+    # How the RTT backend outputs dictionary logs, so that tools reading
+    # RTT know which channel to decode and how.
+    for name in [
+        "CONFIG_LOG_BACKEND_RTT_OUTPUT_DICTIONARY",
+        "CONFIG_LOG_BACKEND_RTT_OUTPUT_DICTIONARY_HEX",
+        "CONFIG_LOG_BACKEND_RTT_BUFFER",
+    ]:
+        if name in kconfigs:
+            database.add_kconfig(name, kconfigs[name])
 
 
 def extract_logging_subsys_information(elf, database, string_mappings):
@@ -588,6 +603,15 @@ def main():
     if args.json and not LogDatabase.write_json_database(args.json, database):
         logger.error("ERROR: Cannot open database file for write: %s, exiting...", args.json)
         sys.exit(1)
+
+    if args.json_gz:
+        if not args.json:
+            logger.error("ERROR: --json-gz requires --json, exiting...")
+            sys.exit(1)
+
+        if not LogDatabase.write_json_database(args.json_gz, database, compress=True):
+            logger.error("ERROR: Cannot open database file for write: %s, exiting...", args.json_gz)
+            sys.exit(1)
 
     if args.syst and not LogDatabase.write_syst_database(args.syst, database):
         logger.error("ERROR: Cannot open database file for write: %s, exiting...", args.syst)
