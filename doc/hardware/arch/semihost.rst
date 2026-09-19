@@ -74,6 +74,11 @@ Executing a semihosting instruction without a debugger attached can fault.
 :c:func:`semihost_debugger_attached` reports that a debugger is attached, and
 returns ``-ENODEV`` otherwise.
 
+On Arm Cortex-M, an attached debugger is detected through the ``C_DEBUGEN`` bit
+of the ``DHCSR`` register. This register is not accessible to software on
+ARMv6-M, where :c:func:`semihost_exit` is therefore only performed on emulated
+targets.
+
 Architectures that cannot detect a debugger only perform :c:func:`semihost_exit`
 on emulated targets, unless :kconfig:option:`CONFIG_SEMIHOST_ASSUME_DEBUGGER` is
 enabled. Enabling it on a target that runs without a debugger makes the
