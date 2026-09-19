@@ -99,6 +99,19 @@ config ZTEST_ASSERT_HOOK
 	  error test case. Remember to add ignore_fault tag in yaml file when
 	  using twister to run testing.
 
+config ZTEST_SEMIHOST_EXIT
+	bool "Report the test result to an attached debugger through semihosting"
+	depends on SEMIHOST
+	depends on !ZTEST_SHELL && !ZTEST_RETEST_IF_PASSED
+	imply SEMIHOST_EXIT_ON_FATAL_ERROR
+	help
+	  After the final test report has been printed, report the overall
+	  result to the host through a semihosting SYS_EXIT_EXTENDED call with
+	  reason ADP_Stopped_ApplicationExit and status 0 if all tests passed,
+	  or 1 otherwise. This lets a debugger that runs the test image, such
+	  as probe-rs run, exit with a status matching the test result. If no
+	  debugger is attached, execution continues as usual.
+
 config ZTEST_NO_YIELD
 	bool "Do not yield to the idle thread after tests complete"
 	default n if (COVERAGE_DUMP || COVERAGE_SEMIHOST)

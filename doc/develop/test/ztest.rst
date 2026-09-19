@@ -921,6 +921,17 @@ means every test suite is executed 3 times and every test case is executed 3 tim
 be changed by the :kconfig:option:`CONFIG_ZTEST_SUITE_REPEAT_COUNT` and
 :kconfig:option:`CONFIG_ZTEST_TEST_REPEAT_COUNT` Kconfig options.
 
+Reporting Results Through Semihosting
+*************************************
+When running tests on hardware under a debugger, enable
+:kconfig:option:`CONFIG_ZTEST_SEMIHOST_EXIT` to report the overall test result
+to the debugger through a semihosting exit (see :ref:`semihost_guide`). The exit
+status is 0 if all tests passed and 1 otherwise, so a debugger that runs the
+test image, such as ``probe-rs run``, exits with a status matching the test
+result. This option also implies
+:kconfig:option:`CONFIG_SEMIHOST_EXIT_ON_FATAL_ERROR`, so that an unexpected
+fatal error ends the run with an error instead of halting the target.
+
 Test Selection
 **************
 For tests built for native simulator, use command line arguments to list
