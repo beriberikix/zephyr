@@ -12,6 +12,7 @@
 #   elfconvert_flag_intarget      : --input-target=
 #   elfconvert_flag_outtarget     : --output-target=
 #   elfconvert_flag_section_remove: --remove-section=
+#   elfconvert_flag_section_add   : --add-section;
 #   elfconvert_flag_section_only  : --only-section=
 #   elfconvert_flag_section_rename: --rename-section;
 #   elfconvert_flag_gapfill       : --gap-fill;
@@ -43,6 +44,7 @@ set_property(TARGET bintools PROPERTY elfconvert_flag_intarget "--input-target="
 set_property(TARGET bintools PROPERTY elfconvert_flag_outtarget "--output-target=")
 
 set_property(TARGET bintools PROPERTY elfconvert_flag_section_remove "--remove-section=")
+set_property(TARGET bintools PROPERTY elfconvert_flag_section_add "--add-section;")
 set_property(TARGET bintools PROPERTY elfconvert_flag_section_only "--only-section=")
 set_property(TARGET bintools PROPERTY elfconvert_flag_section_rename "--rename-section;")
 
