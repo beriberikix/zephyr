@@ -22,6 +22,7 @@ class ProbeRsBinaryRunner(ZephyrBinaryRunner):
                  speed=None,
                  connect_under_reset=False,
                  verify=False,
+                 log_dictionary=None,
                  tool_opt=None):
         super().__init__(cfg)
 
@@ -32,6 +33,7 @@ class ProbeRsBinaryRunner(ZephyrBinaryRunner):
         self.speed = speed
         self.connect_under_reset = connect_under_reset
         self.verify = verify
+        self.log_dictionary = log_dictionary
 
         self.args = ['--chip', chip]
 
@@ -89,6 +91,11 @@ class ProbeRsBinaryRunner(ZephyrBinaryRunner):
                             help='connect under reset')
         parser.add_argument('--verify', action='store_true',
                             help='verify flash after programming')
+        parser.add_argument('--log-dictionary',
+                            help='''path to the dictionary logging database used to decode
+                                 dictionary-based log messages, defaults to the database
+                                 embedded in the ELF file by
+                                 CONFIG_LOG_DICTIONARY_DB_EMBED''')
         parser.add_argument('--gdb-host', default=DEFAULT_PROBE_RS_GDB_HOST,
                             help=f'probe-rs gdb host, defaults to {DEFAULT_PROBE_RS_GDB_HOST}')
         parser.add_argument('--gdb-port', type=int, default=DEFAULT_PROBE_RS_GDB_PORT,
@@ -114,6 +121,7 @@ class ProbeRsBinaryRunner(ZephyrBinaryRunner):
                                    speed=args.speed,
                                    connect_under_reset=args.connect_under_reset,
                                    verify=args.verify,
+                                   log_dictionary=args.log_dictionary,
                                    gdb_host=args.gdb_host,
                                    gdb_port=args.gdb_port,
                                    tool_opt=args.tool_opt)
@@ -182,6 +190,9 @@ class ProbeRsBinaryRunner(ZephyrBinaryRunner):
 
     def do_rtt(self, **kwargs):
         '''Attach to RTT logging using probe-rs attach command.'''
-        attach_cmd = [self.probe_rs, 'attach'] + self.args + [self.elf_name]
+        attach_cmd = [self.probe_rs, 'attach'] + self.args
+        if self.log_dictionary is not None:
+            attach_cmd += ['--zephyr-log-dictionary', self.log_dictionary]
+        attach_cmd += [self.elf_name]
         self.logger.info('Starting RTT session')
         self.check_call(attach_cmd)

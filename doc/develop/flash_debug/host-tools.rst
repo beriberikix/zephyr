@@ -522,6 +522,44 @@ Check `probe-rs Installation`_ for more setup details.
 
 Check if your SoC is listed in `probe-rs Supported Devices`_.
 
+Supported west commands:
+
+1. flash
+2. debug
+3. debugserver
+4. rtt
+
+Running tests on hardware
+=========================
+
+``probe-rs run`` flashes an image, streams its RTT output and exits when the
+application does, which makes it usable as a test runner. Two Zephyr options
+make the output and the exit status useful to it:
+
+* :kconfig:option:`CONFIG_ZTEST_SEMIHOST_EXIT` makes a ztest image report its
+  result through a semihosting exit, so ``probe-rs run`` exits with 0 when all
+  tests passed and non-zero otherwise, instead of running forever. It implies
+  :kconfig:option:`CONFIG_SEMIHOST_EXIT_ON_FATAL_ERROR`, which reports fatal
+  errors the same way, after they have been logged.
+* :kconfig:option:`CONFIG_LOG_DICTIONARY_DB_EMBED` embeds the dictionary
+  logging database into the ELF file, so probe-rs can decode
+  :ref:`dictionary-based log messages <logging_guide_dictionary>` sent over RTT
+  without a separate database file. The section is not loaded to the target,
+  so the flashed image is unchanged.
+
+.. code-block:: console
+
+   west build -b <board> -- -DCONFIG_ZTEST_SEMIHOST_EXIT=y \
+        -DCONFIG_LOG_DICTIONARY_DB_EMBED=y
+   probe-rs run --chip <chip> build/zephyr/zephyr.elf; echo $?
+
+``west rtt`` attaches to a running target instead. If the database is not
+embedded, pass it explicitly:
+
+.. code-block:: console
+
+   west rtt --log-dictionary build/zephyr/log_dictionary.json
+
 .. _runner_rfp:
 
 Renesas Flash Programmer (RFP) Host Tools
