@@ -1619,6 +1619,42 @@ called with a ``--build-dir`` with the path of the current build, as well as a
 ``--board-id`` flag to identify the specific device when multiple are available
 in a hardware map.
 
+Runners that run the test themselves
+====================================
+
+Some runners flash the device, print its output and exit when the application
+is done, instead of leaving the output to a serial console. ``probe-rs run``
+does this: it streams the RTT output of the device and exits with the status
+the application reported through semihosting.
+
+Set ``runner_console: true`` in the hardware map to use such a runner. Twister
+then reads the output of the flash command instead of opening a serial port,
+and the exit status of the command is taken into account for the result, so the
+entry needs no ``serial`` or ``serial_pty``:
+
+.. code-block:: yaml
+
+   - connected: true
+     id: "1366:1015:000683930094"
+     platform: nrf52840dk/nrf52840
+     product: nRF52840DK
+     runner: probe-rs
+     runner_console: true
+     flash_timeout: 180
+
+The test image has to send its output over RTT, and should end the run itself
+so that the runner exits, for example with
+:kconfig:option:`CONFIG_ZTEST_SEMIHOST_EXIT` (see :ref:`runner_probe_rs`):
+
+.. code-block:: bash
+
+   west twister -p nrf52840dk/nrf52840 --device-testing \
+        --hardware-map map.yaml -T tests/... \
+        --extra-args CONFIG_USE_SEGGER_RTT=y \
+        --extra-args CONFIG_RTT_CONSOLE=y \
+        --extra-args CONFIG_UART_CONSOLE=n \
+        --extra-args CONFIG_ZTEST_SEMIHOST_EXIT=y
+
 .. tabs::
 
    .. group-tab:: Linux

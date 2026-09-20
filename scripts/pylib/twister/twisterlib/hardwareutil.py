@@ -109,7 +109,9 @@ class HardwareReservationManager:
         """Get a list of DUTs that match the specified device and fixture criteria."""
         matched_duts: list[DUT] = []
         for d in self.hwm.duts:
-            if d.platform != platform or (d.serial is None and d.serial_pty is None):
+            if d.platform != platform or (
+                d.serial is None and d.serial_pty is None and not d.runner_console
+            ):
                 continue
             if fixture and not all(f in (f.split(sep=':')[0] for f in d.fixtures) for f in fixture):
                 continue
