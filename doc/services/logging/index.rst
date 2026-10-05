@@ -876,6 +876,12 @@ in the build directory. This database file contains information for the parser
 to correctly parse the log data. Note that this database file only works
 with the same build, and cannot be used for any other builds.
 
+Enable :kconfig:option:`CONFIG_LOG_DICTIONARY_DB_EMBED` to also add a
+gzip-compressed copy of the database to :file:`zephyr.elf` as the non-allocated
+section ``.zephyr_log_dict``, so tools that load the ELF can decode
+dictionary-based logs without the separate file. The flashed image does not
+change.
+
 Offline Parsing
 ^^^^^^^^^^^^^^^
 

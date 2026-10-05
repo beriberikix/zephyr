@@ -43,3 +43,12 @@ tests:
         - "--bin"
     extra_configs:
       - CONFIG_LOG_BACKEND_UART_OUTPUT_DICTIONARY_BIN=y
+  logging.dictionary.embedded_db:
+    tags: logging
+    harness: pytest
+    harness_config:
+      pytest_root:
+        - "pytest/test_logging_dictionary.py"
+    extra_configs:
+      - CONFIG_LOG_BACKEND_UART_OUTPUT_DICTIONARY_HEX=y
+      - CONFIG_LOG_DICTIONARY_DB_EMBED=y

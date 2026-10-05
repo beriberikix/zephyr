@@ -72,6 +72,8 @@
 #   elfconvert_flag_outtarget     : Flag for specifying target to use for converted file.
 #                                   Target value must be one of those listed described by: elfconvert_formats
 #   elfconvert_flag_section_remove: Flag for specifying that following section must be removed
+#   elfconvert_flag_section_add   : Flag for adding a non-allocated section, followed by
+#                                   <name>=<file> with the section contents
 #   elfconvert_flag_section_only  : Flag for specifying that only the following section should be kept
 #   elfconvert_flag_section_rename: Flag for specifying that following section must be renamed
 #   elfconvert_flag_gapfill       : Flag for specifying the value to fill in gaps between sections
@@ -150,6 +152,7 @@ set_property(TARGET bintools PROPERTY elfconvert_flag_strip_unneeded "")
 set_property(TARGET bintools PROPERTY elfconvert_flag_compress_debug_sections "")
 set_property(TARGET bintools PROPERTY elfconvert_flag_outtarget "")
 set_property(TARGET bintools PROPERTY elfconvert_flag_section_remove "")
+set_property(TARGET bintools PROPERTY elfconvert_flag_section_add "")
 set_property(TARGET bintools PROPERTY elfconvert_flag_gapfill "")
 set_property(TARGET bintools PROPERTY elfconvert_flag_infile "")
 set_property(TARGET bintools PROPERTY elfconvert_flag_outfile "")

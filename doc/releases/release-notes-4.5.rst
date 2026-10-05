@@ -796,6 +796,11 @@ New APIs and options
   * :c:func:`lin_get_transceiver`
   * :kconfig:option:`CONFIG_LIN`
 
+* Logging
+
+  * :kconfig:option:`CONFIG_LOG_DICTIONARY_DB_EMBED` (embed the dictionary logging database
+    into the ELF file)
+
 * LoRa
 
   * :c:func:`lora_recv_duty_cycle`

@@ -2260,6 +2260,16 @@ if(LOG_DICT_DB_NAME_ARG)
       --build-header ${PROJECT_BINARY_DIR}/include/generated/zephyr/version.h
   )
 
+  if(CONFIG_LOG_DICTIONARY_DB_EMBED)
+    get_property(elfconvert_flag_section_add TARGET bintools PROPERTY elfconvert_flag_section_add)
+    if(NOT elfconvert_flag_section_add)
+      message(FATAL_ERROR "CONFIG_LOG_DICTIONARY_DB_EMBED is not supported by the "
+                          "${BINTOOLS} bintools, it lacks support for adding ELF sections")
+    endif()
+    set(LOG_DICT_DB_EMBED_NAME ${LOG_DICT_DB_NAME}.gz)
+    list(APPEND log_dict_gen_command --json-gz=${LOG_DICT_DB_EMBED_NAME})
+  endif()
+
   if(NOT CONFIG_LOG_DICTIONARY_DB_TARGET)
     # If not using a separate target for generating logging dictionary
     # database, add the generation to post build command to make sure
@@ -2273,6 +2283,22 @@ if(LOG_DICT_DB_NAME_ARG)
       post_build_byproducts
       ${LOG_DICT_DB_NAME}
     )
+
+    if(CONFIG_LOG_DICTIONARY_DB_EMBED)
+      # Non-allocated section, so the flashed image does not change
+      list(APPEND
+        post_build_commands
+        COMMAND $<TARGET_PROPERTY:bintools,elfconvert_command>
+                $<TARGET_PROPERTY:bintools,elfconvert_flag_final>
+                $<TARGET_PROPERTY:bintools,elfconvert_flag_section_add>.zephyr_log_dict=${LOG_DICT_DB_EMBED_NAME}
+                $<TARGET_PROPERTY:bintools,elfconvert_flag_infile>${KERNEL_ELF_NAME}
+                $<TARGET_PROPERTY:bintools,elfconvert_flag_outfile>${KERNEL_ELF_NAME}
+      )
+      list(APPEND
+        post_build_byproducts
+        ${LOG_DICT_DB_EMBED_NAME}
+      )
+    endif()
   else()
     # Seprate build target for generating logging dictionary database.
     # This needs to be explicitly called/used to generate the database.

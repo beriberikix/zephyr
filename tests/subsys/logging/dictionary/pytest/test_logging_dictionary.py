@@ -9,17 +9,37 @@ Pytest harness to test the output of the dictionary logging.
 '''
 
 import contextlib
+import gzip
 import logging
 import os
 import re
 import shlex
 import subprocess
 
+from elftools.elf.elffile import ELFFile
 from twister_harness import DeviceAdapter
 
 ZEPHYR_BASE = os.getenv("ZEPHYR_BASE")
 
 logger = logging.getLogger(__name__)
+
+
+def get_dictionary_db(build_dir):
+    '''Return the database to parse with, extracted from the ELF when embedded.'''
+    dictionary_json = os.path.join(build_dir, "zephyr", "log_dictionary.json")
+    assert os.path.isfile(dictionary_json)
+
+    with open(os.path.join(build_dir, "zephyr", "zephyr.elf"), "rb") as elf_fd:
+        section = ELFFile(elf_fd).get_section_by_name(".zephyr_log_dict")
+        if section is None:
+            return dictionary_json
+
+        embedded_json = os.path.join(build_dir, "embedded_log_dictionary.json")
+        with open(embedded_json, "wb") as fd:
+            fd.write(gzip.decompress(section.data()))
+
+    logger.info('Using embedded dictionary database')
+    return embedded_json
 
 
 def process_logs(dut: DeviceAdapter, build_dir):
@@ -35,8 +55,7 @@ def process_logs(dut: DeviceAdapter, build_dir):
     logger.info(f'Log parser script: {parser_script}')
 
     # And also the dictionary JSON file is there...
-    dictionary_json = os.path.join(build_dir, "zephyr", "log_dictionary.json")
-    assert os.path.isfile(dictionary_json)
+    dictionary_json = get_dictionary_db(build_dir)
     logger.info(f'Dictionary JSON: {dictionary_json}')
 
     # Read the encoded logs and save them to a file
@@ -240,8 +259,7 @@ def process_binary_logs(build_dir):
     parser_script = os.path.join(ZEPHYR_BASE, "scripts", "logging", "dictionary", "log_parser.py")
     assert os.path.isfile(parser_script)
 
-    dictionary_json = os.path.join(build_dir, "zephyr", "log_dictionary.json")
-    assert os.path.isfile(dictionary_json)
+    dictionary_json = get_dictionary_db(build_dir)
 
     cmd = [parser_script, dictionary_json, trimmed_bin]
     logger.info(f'Running parser: {shlex.join(cmd)}')

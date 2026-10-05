@@ -103,6 +103,16 @@ config LOG_DICTIONARY_DB_TARGET
 	  This removes the target from the ALL make target and the target
 	  'log_dict_db_gen' has to be called in addition.
 
+config LOG_DICTIONARY_DB_EMBED
+	bool "Embed log dictionary database into the ELF file"
+	depends on LOG_DICTIONARY_DB
+	depends on !LOG_DICTIONARY_DB_TARGET
+	help
+	  Add a gzip-compressed copy of the database to the ELF file as the
+	  non-allocated section .zephyr_log_dict, so tools that load the ELF
+	  can decode dictionary-based logs without the separate file. The
+	  flashed image is unchanged.
+
 config LOG_MSG_APPEND_RO_STRING_LOC
 	bool
 	help
