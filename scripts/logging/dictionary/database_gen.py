@@ -253,6 +253,15 @@ def process_kconfigs(elf, database):
     if "CONFIG_LOG_TIMESTAMP_64BIT" in kconfigs:
         database.add_kconfig("CONFIG_LOG_TIMESTAMP_64BIT", kconfigs['CONFIG_LOG_TIMESTAMP_64BIT'])
 
+    # Tells tools reading RTT which channel carries dictionary logs, and how
+    for name in [
+        "CONFIG_LOG_BACKEND_RTT_OUTPUT_DICTIONARY",
+        "CONFIG_LOG_BACKEND_RTT_OUTPUT_DICTIONARY_HEX",
+        "CONFIG_LOG_BACKEND_RTT_BUFFER",
+    ]:
+        if name in kconfigs:
+            database.add_kconfig(name, kconfigs[name])
+
 
 def extract_logging_subsys_information(elf, database, string_mappings):
     """
